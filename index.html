@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>axios</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js'></script>
+</head>
+
+<body>
+    <div id='app'>
+        <div>
+            书名：《__name__》 数量：<span id='number'>__number__</span>
+        </div>
+        <div>
+            <button id='addOne'>+</button>
+            <button id='minusOne'>-</button>
+            <button id='resect'>0</button>
+        </div>
+    </div>
+</body>
+
+<script>
+    let book = {
+        'name': 'js',
+        'number': 2,
+        'id': 1
+    }
+    axios.interceptors.response.use(function(response) {
+        // let config = response.config
+        // let {
+        //     method,
+        //     url,
+        //     data
+        // } = config
+
+        let {
+            config: {
+                method,
+                url,
+                data
+            }
+        } = response
+        if (url = '/books/1' && method === 'get') {
+            response.data = book
+        } else if (url === '/books/1' && method === 'put') {
+            Object.assign(book, data)
+        }
+
+        return response
+    })
+
+    axios.get('/books/1')
+        .then(({
+            data
+        }) => {
+            let originalHtml = $('#app').html()
+            console.log(originalHtml)
+            let newHtml = originalHtml.replace('__name__', data.name)
+                .replace('__number__', data.number)
+            $('#app').html(newHtml)
+        })
+
+
+
+
+    $('#app').on('click', '#addOne', function() {
+        var oldNumber = $('#number').text()
+        var newNumber = oldNumber - 0 + 1
+        axios.put('/books/1', {
+            number: newNumber
+        }).then(() => {
+            $('#number').text(newNumber)
+        })
+
+    })
+
+    $('#app').on('click', '#minusOne', function() {
+        var oldNumber = $('#number').text()
+        var newNumber = oldNumber - 0 - 1
+        axios.put('/books/1', {
+            number: newNumber
+        }).then(() => {
+            $('#number').text(newNumber)
+        })
+    })
+
+    $('#app').on('click', '#resect', function() {
+        var oldNumber = $('#number').text()
+        var newNumber = 0
+        axios.put('/books/1', {
+            number: newNumber
+        }).then(() => {
+            $('#number').text(newNumber)
+        })
+    })
+</script>
+
+</html>
