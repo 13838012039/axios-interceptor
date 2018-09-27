@@ -8,20 +8,13 @@
     <title>axios</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js'></script>
+    <script src="https://cdn.bootcss.com/vue/2.5.13/vue.min.js"></script>
 </head>
 
 <body>
 
 
     <div id='app'>
-        <div>
-            书名：《__name__》 数量：<span id='number'>__number__</span>
-        </div>
-        <div>
-            <button id='addOne'>+</button>
-            <button id='minusOne'>-</button>
-            <button id='reset'>0</button>
-        </div>
     </div>
 </body>
 
@@ -44,12 +37,7 @@
         let id = this.data.id
         return axios.put(`/${this.resouce}s/${id}`, data).then((response) => {
             this.data = response.data
-            console.log('response.data')
-            console.log(response)
-            console.log('data')
-            console.log(data)
-            console.log('id')
-            console.log(id)
+
             return response
         })
     }
@@ -65,139 +53,85 @@
         resouce: 'book'
     })
 
-    function View({
-        el,
-        template
-    }) {
-        this.el = el
-        this.template = template
-    }
-    View.prototype.render = function(data) {
-        let html = this.template
-        for (let key in data) {
-            html = html.replace(`__${key}__`, data[key])
-        }
-
-        $(this.el).html(html)
-    }
 
 
 
-
-
-
-    // let model = {
-    //     data: {
-    //         name: '',
-    //         number: 0,
-    //         id: '1'
-    //     },
-    //     fetch(id) {
-    //         return axios.get(`/books/${id}`).then((response) => {
-    //             this.data = response.data
-    //             return response
-    //         })
-    //     },
-    //     updata(data) {
-    //         let id = this.data.id
-    //         return axios.put(`/books/${id}`, data).then((response) => {
-    //             this.data = response.data
-    //             console.log('response.data')
-    //             console.log(response)
-    //             console.log('data')
-    //             console.log(data)
-    //             console.log('id')
-    //             console.log(id)
-    //             return response
-    //         })
-    //     }
-
-
-    // }
-
-
-    let view = new View({
+    let view = new Vue({
         el: '#app',
+        data: {
+            book: {
+                name: '',
+                number: 0,
+                id: ''
+            },
+            n: 1
+        },
         template: ` 
         <div>
-            书名：《__name__》 数量：<span id='number'>__number__</span>
-        </div>
-        <div>
-            <button id='addOne'>+</button>
-            <button id='minusOne'>-</button>
-            <button id='reset'>0</button>
+            <div>
+                书名：《{{book.name}}》 数量：<span id='number'>{{book.number}}</span>
+            </div>
+            <div>
+                <input v-model="n" />
+            </div>
+            N的值是{{n}}
+            <div>
+                <button v-on:click="addOne">+</button>
+                <button v-on:click="minusOne">-</button>
+                <button v-on:click="reset">0</button>
+            </div>
         </div>
         `,
-        render(data) {
-            let html = this.template.replace('__name__', data.name)
-                .replace('__number__', data.number)
-            $(this.el).html(html)
-        }
-    })
+        created() {
+            model.fetch(1).then(() => {
+                this.book = model.data
+            })
+        },
+        methods: {
+
+            addOne() {
 
 
-    var controller = {
-        init(options) {
-            let view = options.view
-            let model = options.model
-            this.view = view
-            this.model = model
-            this.view.render(this.model.data)
-            this.bindEvents()
-            this.model.fetch(1)
-                .then(() => {
+                model.updata({
+                    number: this.book.number + (this.n - 0)
+                }).then(() => {
 
-                    this.view.render(this.model.data)
+
+                    this.view.book = this.model.data
                 })
-        },
-        addOne() {
-
-            var oldNumber = $('#number').text()
-            var newNumber = oldNumber - 0 + 1
-            this.model.updata({
-                number: newNumber
-            }).then(() => {
-
-                this.view.render(this.model.data)
-            }, () => {})
 
 
-        },
-        minusOne() {
-
-            var oldNumber = $('#number').text()
-            var newNumber = oldNumber - 0 - 1
-
-            this.model.updata({
-                number: newNumber
-            }).then(() => {
-                this.view.render(this.model.data)
-            })
-
-        },
-        reset() {
+            },
+            minusOne() {
 
 
-            this.model.updata({
-                number: 0
-            }).then(() => {
-                this.view.render(this.model.data)
-            })
+
+                model.updata({
+                    number: this.book.number - (this.n - 0)
+                }).then(() => {
+                    this.view.book = this.model.data
+                })
+
+            },
+            reset() {
+
+
+                model.updata({
+                    number: 0
+                }).then(() => {
+                    this.view.book = this.model.data
+                })
+
+            }
+
+
 
         },
-        bindEvents() {
-
-            $(this.view.el).on('click', '#addOne', this.addOne.bind(this))
-            $(this.view.el).on('click', '#minusOne', this.minusOne.bind(this))
-            $(this.view.el).on('click', '#reset', this.reset.bind(this))
-        }
-    }
 
 
-    controller.init({
-        view: view,
-        model: model
     })
+
+
 
 
 
@@ -236,13 +170,11 @@
             } = response
             if (url === '/books/1' && method === 'get') {
                 response.data = book
-                console.log('book')
-                console.log(book)
+
             } else if (url === '/books/1' && method === 'put') {
                 data = JSON.parse(data)
                 Object.assign(book, data)
-                console.log('book')
-                console.log(book)
+
                 response.data = book
             }
 
