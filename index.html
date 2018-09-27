@@ -30,39 +30,93 @@
         // 上面是假的后台
 
 
+    function Model(options) {
+        this.data = options.data
+        this.resouce = options.resouce
+    }
+    Model.prototype.fetch = function(id) {
+        return axios.get(`/${this.resouce}s/${id}`).then((response) => {
+            this.data = response.data
+            return response
+        })
+    }
+    Model.prototype.updata = function(data) {
+        let id = this.data.id
+        return axios.put(`/${this.resouce}s/${id}`, data).then((response) => {
+            this.data = response.data
+            console.log('response.data')
+            console.log(response)
+            console.log('data')
+            console.log(data)
+            console.log('id')
+            console.log(id)
+            return response
+        })
+    }
 
 
-    let model = {
+    //上面是MVC类，下面是对象
+    let model = new Model({
         data: {
             name: '',
             number: 0,
             id: '1'
         },
-        fetch(id) {
-            return axios.get(`/books/${id}`).then((response) => {
-                this.data = response.data
-                return response
-            })
-        },
-        updata(data) {
-            let id = this.data.id
-            return axios.put(`/books/${id}`, data).then((response) => {
-                this.data = response.data
-                console.log('response.data')
-                console.log(response)
-                console.log('data')
-                console.log(data)
-                console.log('id')
-                console.log(id)
-                return response
-            })
+        resouce: 'book'
+    })
+
+    function View({
+        el,
+        template
+    }) {
+        this.el = el
+        this.template = template
+    }
+    View.prototype.render = function(data) {
+        let html = this.template
+        for (let key in data) {
+            html = html.replace(`__${key}__`, data[key])
         }
 
-
+        $(this.el).html(html)
     }
 
 
-    let view = {
+
+
+
+
+    // let model = {
+    //     data: {
+    //         name: '',
+    //         number: 0,
+    //         id: '1'
+    //     },
+    //     fetch(id) {
+    //         return axios.get(`/books/${id}`).then((response) => {
+    //             this.data = response.data
+    //             return response
+    //         })
+    //     },
+    //     updata(data) {
+    //         let id = this.data.id
+    //         return axios.put(`/books/${id}`, data).then((response) => {
+    //             this.data = response.data
+    //             console.log('response.data')
+    //             console.log(response)
+    //             console.log('data')
+    //             console.log(data)
+    //             console.log('id')
+    //             console.log(id)
+    //             return response
+    //         })
+    //     }
+
+
+    // }
+
+
+    let view = new View({
         el: '#app',
         template: ` 
         <div>
@@ -79,7 +133,7 @@
                 .replace('__number__', data.number)
             $(this.el).html(html)
         }
-    }
+    })
 
 
     var controller = {
